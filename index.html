@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Закупівлі</title>
+</head>
+<body>
+
+<h2>Система планування закупівель</h2>
+
+<input id="name" placeholder="Назва">
+<input id="quantity" placeholder="Кількість">
+<input id="price" placeholder="Ціна">
+
+<button onclick="add()">Додати</button>
+
+<table border="1" id="table"></table>
+
+<script>
+const SUPABASE_URL = "https://tjmajqedcwoomvmetgkg.supabase.co";
+const SUPABASE_KEY = "sb_publishable_lxSiRtz9QtxAZ8gpiHlZqw_uJPe2-Oh";
+
+async function add() {
+  const name = document.getElementById('name').value;
+  const quantity = document.getElementById('quantity').value;
+  const price = document.getElementById('price').value;
+
+  await fetch(SUPABASE_URL + "/rest/v1/purchases", {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + SUPABASE_KEY,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ name, quantity, price })
+  });
+
+  load();
+}
+
+async function load() {
+  const res = await fetch(SUPABASE_URL + "/rest/v1/purchases", {
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + SUPABASE_KEY
+    }
+  });
+
+  const data = await res.json();
+  const table = document.getElementById('table');
+
+  table.innerHTML = "<tr><th>Назва</th><th>К-сть</th><th>Ціна</th></tr>";
+
+  data.forEach(row => {
+    table.innerHTML += `<tr><td>${row.name}</td><td>${row.quantity}</td><td>${row.price}</td></tr>`;
+  });
+}
+
+load();
+</script>
+
+</body>
+</html>
