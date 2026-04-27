@@ -6,69 +6,24 @@
 <title>Система закупівель</title>
 
 <style>
-body{
-font-family:Arial;
-background:#f4f6f8;
-margin:0;
-padding:20px;
-}
-.container{
-max-width:1200px;
-margin:auto;
-background:white;
-padding:20px;
-border-radius:12px;
-box-shadow:0 0 15px rgba(0,0,0,0.1);
-}
-h1{
-margin-top:0;
-color:#003366;
-}
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:10px;
-margin-bottom:15px;
-}
-input,select,button{
-padding:10px;
-border:1px solid #ccc;
-border-radius:8px;
-font-size:14px;
-}
-button{
-background:#0066cc;
-color:white;
-border:none;
-cursor:pointer;
-}
-button:hover{
-background:#004fa3;
-}
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:20px;
-font-size:14px;
-}
-th,td{
-border:1px solid #ddd;
-padding:8px;
-text-align:left;
-}
-th{
-background:#003366;
-color:white;
-}
-tr:nth-child(even){
-background:#f9f9f9;
-}
+body{font-family:Arial;background:#f2f4f7;margin:0;padding:20px}
+.box{max-width:1300px;margin:auto;background:white;padding:20px;border-radius:12px}
+h1{color:#003366}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+input,select,button{padding:10px;border:1px solid #ccc;border-radius:8px}
+button{background:#0066cc;color:white;border:none;cursor:pointer}
+button:hover{background:#004fa3}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{border:1px solid #ddd;padding:8px}
+th{background:#003366;color:white}
+tr:nth-child(even){background:#f9f9f9}
+.section{margin-top:30px}
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="box">
 
 <h1>КИЇВСЬКИЙ ПАЛАЦ ДІТЕЙ ТА ЮНАЦТВА</h1>
 <h3>Система планування та обліку закупівель</h3>
@@ -82,103 +37,134 @@ background:#f9f9f9;
 <option>ДИРЕКЦІЯ</option>
 <option>БУХГАЛТЕРІЯ</option>
 <option>ВІДДІЛ КАДРІВ</option>
-<option>ВІДДІЛ STEM-ОСВІТИ</option>
-<option>АДМІНІСТРАТИВНО-ГОСПОДАРЧИЙ ВІДДІЛ</option>
+<option>АГВ</option>
 <option>ВОДНА СТАНЦІЯ</option>
 </select>
 
-<select id="status">
-<option>план</option>
-<option>оголошено</option>
-<option>завершено</option>
-</select>
-
-<button onclick="add()">Додати</button>
+<button onclick="add()">Додати закупівлю</button>
 </div>
 
-<table id="table">
-<tr>
-<th>Назва</th>
-<th>К-сть</th>
-<th>Ціна</th>
-<th>Сума</th>
-<th>Відділ</th>
-<th>Статус</th>
-</tr>
-</table>
+<div class="section">
+<h3>План закупівель</h3>
+<table id="table1"></table>
+</div>
+
+<div class="section">
+<h3>Склад</h3>
+
+<div class="grid">
+<input id="wname" placeholder="Назва товару">
+<input id="received" type="number" placeholder="Отримано">
+<button onclick="receive()">Прийняти товар</button>
+</div>
+
+<table id="table2"></table>
+
+</div>
 
 </div>
 
 <script>
-const SUPABASE_URL = "https://tjmajqedcwoomvmetgkg.supabase.co";
-const SUPABASE_KEY = "ТВІЙ_КЛЮЧ";
+const SUPABASE_URL="https://tjmajqedcwoomvmetgkg.supabase.co";
+const SUPABASE_KEY="ТВІЙ_КЛЮЧ";
 
 async function add(){
 
-let name=document.getElementById("name").value;
-let quantity=document.getElementById("quantity").value;
-let price=document.getElementById("price").value;
-let department=document.getElementById("department").value;
-let status=document.getElementById("status").value;
-
-let total=quantity*price;
+let name=nameEl("name");
+let quantity=nameEl("quantity");
+let price=nameEl("price");
+let department=nameEl("department");
 
 await fetch(SUPABASE_URL+"/rest/v1/purchases",{
 method:"POST",
-headers:{
-apikey:SUPABASE_KEY,
-Authorization:"Bearer "+SUPABASE_KEY,
-"Content-Type":"application/json"
-},
+headers:head(),
 body:JSON.stringify({
 name,
 quantity,
 price,
-total,
+total:quantity*price,
 department,
-status
+status:"план"
 })
 });
 
 load();
 }
 
-async function load(){
+async function receive(){
 
-const res=await fetch(SUPABASE_URL+"/rest/v1/purchases?select=*",{
-headers:{
-apikey:SUPABASE_KEY,
-Authorization:"Bearer "+SUPABASE_KEY
-}
+let wname=nameEl("wname");
+let received=nameEl("received");
+
+await fetch(SUPABASE_URL+"/rest/v1/warehouse",{
+method:"POST",
+headers:head(),
+body:JSON.stringify({
+name:wname,
+received,
+balance:received
+})
 });
 
-const data=await res.json();
+load();
+}
 
-let html=`
-<tr>
+function nameEl(id){
+return document.getElementById(id).value;
+}
+
+function head(){
+return {
+apikey:SUPABASE_KEY,
+Authorization:"Bearer "+SUPABASE_KEY,
+"Content-Type":"application/json"
+};
+}
+
+async function load(){
+
+let p=await fetch(SUPABASE_URL+"/rest/v1/purchases?select=*",{headers:head()});
+let pdata=await p.json();
+
+let html=`<tr>
 <th>Назва</th>
 <th>К-сть</th>
 <th>Ціна</th>
 <th>Сума</th>
 <th>Відділ</th>
-<th>Статус</th>
-</tr>
-`;
+</tr>`;
 
-data.forEach(row=>{
-html+=`
-<tr>
-<td>${row.name||""}</td>
-<td>${row.quantity||""}</td>
-<td>${row.price||""}</td>
-<td>${row.total||""}</td>
-<td>${row.department||""}</td>
-<td>${row.status||""}</td>
-</tr>
-`;
+pdata.forEach(r=>{
+html+=`<tr>
+<td>${r.name||""}</td>
+<td>${r.quantity||""}</td>
+<td>${r.price||""}</td>
+<td>${r.total||""}</td>
+<td>${r.department||""}</td>
+</tr>`;
 });
 
-document.getElementById("table").innerHTML=html;
+document.getElementById("table1").innerHTML=html;
+
+let w=await fetch(SUPABASE_URL+"/rest/v1/warehouse?select=*",{headers:head()});
+let wdata=await w.json();
+
+let html2=`<tr>
+<th>Назва</th>
+<th>Отримано</th>
+<th>Залишок</th>
+</tr>`;
+
+wdata.forEach(r=>{
+html2+=`<tr>
+<td>${r.name||""}</td>
+<td>${r.received||""}</td>
+<td>${r.balance||""}</td>
+</tr>`;
+});
+
+document.getElementById("table2").innerHTML=html2;
+
 }
 
 load();
