@@ -150,22 +150,26 @@ alert("Видано: "+qty+" шт");
 load();
 }
 
-async function load(){
+async function add(){
 
-let p=await fetch(SUPABASE_URL+"/rest/v1/purchases?select=*",{headers:H()});
-let pdata=await p.json();
-
-let t1="<tr><th>Назва</th><th>Тип</th><th>К-сть</th><th>Ціна</th><th>Сума</th></tr>";
-
-pdata.forEach(r=>{
-t1+=`<tr>
-<td>${r.name||""}</td>
-<td>${r.type||""}</td>
-<td>${r.quantity||""}</td>
-<td>${r.price||""}</td>
-<td>${r.total||""}</td>
-</tr>`;
+await fetch(SUPABASE_URL+"/rest/v1/purchases",{
+method:"POST",
+headers:H(),
+body:JSON.stringify({
+name:V("name"),
+quantity:V("quantity"),
+price:V("price"),
+type:V("type"),
+kekv:
+V("type")=="Товар" ? "2210" :
+V("type")=="Послуга" ? "2240" :
+V("type")=="Роботи" ? "3132" : "",
+total:V("quantity")*V("price")
+})
 });
+
+load();
+}
 
 document.getElementById("table1").innerHTML=t1;
 
