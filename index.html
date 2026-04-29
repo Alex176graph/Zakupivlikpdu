@@ -28,9 +28,17 @@ th{background:#003366;color:white}
 <h3>План закупівель</h3>
 
 <div class="grid">
-<input id="name" placeholder="Назва товару">
+<input id="name" placeholder="Назва товару / послуги">
 <input id="quantity" type="number" placeholder="Кількість">
 <input id="price" type="number" placeholder="Ціна">
+
+<select id="type">
+<option value="Товар">Товар</option>
+<option value="Послуга">Послуга</option>
+<option value="Роботи">Роботи</option>
+<option value="Інше">Інше</option>
+</select>
+
 <button onclick="add()">Додати</button>
 </div>
 
