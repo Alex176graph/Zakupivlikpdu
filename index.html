@@ -152,7 +152,7 @@ async function load(){
 let p=await fetch(SUPABASE_URL+"/rest/v1/purchases?select=*",{headers:H()});
 let pdata=await p.json();
 
-let t1="<tr><th>Назва</th><th>К-сть</th><th>Ціна</th><th>Сума</th></tr>";
+let t1="<tr><th>Назва</th><th>Тип</th><th>К-сть</th><th>Ціна</th><th>Сума</th></tr>";
 
 pdata.forEach(r=>{
 t1+=`<tr>
