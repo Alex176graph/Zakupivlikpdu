@@ -97,9 +97,12 @@ name:V("name"),
 quantity:V("quantity"),
 price:V("price"),
 type:V("type"),
+kekv:
+V("type")=="Товар" ? "2210" :
+V("type")=="Послуга" ? "2240" :
+V("type")=="Роботи" ? "3132" : "",
 total:V("quantity")*V("price")
 })
-});
 
 load();
 }
